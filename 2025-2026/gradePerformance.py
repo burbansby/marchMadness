@@ -128,16 +128,24 @@ for n in range(1, 7):
 calibration = pd.DataFrame(calib_rows)
 
 # --- Championship & deep-run forecast ---
+# The model's per-team exit distributions each sum to ~100%, but they are not
+# jointly normalized across the field: the raw P(Champions) column sums to far
+# more than 100% (there can only be one champion). Rescale it into true title
+# odds that sum to 100% before treating it as a championship probability.
+raw_champ_total = df["PChamp"].sum()
+df["TitleOdds"] = df["PChamp"] / raw_champ_total * 100.0
+
 champ_idx = df["Actual"].idxmax()
 champion = df.loc[champ_idx, "Team"]
-model_pick = df.loc[df["PChamp"].idxmax(), "Team"]
+model_pick = df.loc[df["TitleOdds"].idxmax(), "Team"]
 df["IsChamp"] = (df.index == champ_idx).astype(int)
-brier_champ = ((df["PChamp"] / 100.0 - df["IsChamp"]) ** 2).mean()
-# Final-Four Brier: model's title-game-or-better odds vs. teams reaching ≥4 wins.
+brier_champ = ((df["TitleOdds"] / 100.0 - df["IsChamp"]) ** 2).mean()
+# Final-Four Brier: scored as 68 independent "did they reach ≥4 wins" predictions,
+# so this one does not need cross-field normalization.
 made_f4 = (df["Actual"] >= 4).astype(int)
 brier_f4 = ((df["PReach4"] / 100.0 - made_f4) ** 2).mean()
-title_contenders = df.nlargest(8, "PChamp")[
-    ["Team", "Seed", "PChamp", "PReach4", "Actual"]
+title_contenders = df.nlargest(8, "TitleOdds")[
+    ["Team", "Seed", "TitleOdds", "Actual"]
 ].copy()
 
 # --- Confidence vs accuracy ---
@@ -217,13 +225,17 @@ lines.append(df_to_md(seed_fmt.reset_index()))
 lines.append("")
 
 lines.append("## Championship & Deep-Run Forecast\n")
-lines.append(f"- **Model's title pick:** {model_pick} ({df.loc[df['PChamp'].idxmax(), 'PChamp']:.1f}% to win it all)")
+lines.append(f"- **Model's title pick:** {model_pick} ({df.loc[df['TitleOdds'].idxmax(), 'TitleOdds']:.1f}% to win it all)")
 lines.append(f"- **Actual champion:** {champion} ({int(df.loc[champ_idx, 'Actual'])} wins)")
 lines.append(f"- **Champion Brier score:** {brier_champ:.4f} (lower is better)")
 lines.append(f"- **Final-4 Brier score:** {brier_f4:.4f}")
 lines.append("")
-lines.append("Model's top title contenders vs. how they finished:\n")
-tc_fmt = fmt_df(title_contenders, float_cols=["PChamp", "PReach4"])
+lines.append(f"> Title odds are rescaled to sum to 100% across the field. The model's raw "
+             f"`P(Champions)` column sums to {raw_champ_total:.0f}% — its per-team distributions "
+             f"are not jointly normalized, so it over-allocates championship share (and deep runs "
+             f"generally; see calibration below).\n")
+lines.append("Model's top title contenders (normalized odds) vs. how they finished:\n")
+tc_fmt = fmt_df(title_contenders, float_cols=["TitleOdds"])
 lines.append(df_to_md(tc_fmt))
 lines.append("")
 

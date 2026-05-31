@@ -28,23 +28,25 @@
 
 ## Championship & Deep-Run Forecast
 
-- **Model's title pick:** Houston (36.9% to win it all)
+- **Model's title pick:** Houston (19.2% to win it all)
 - **Actual champion:** Michigan (6 wins)
-- **Champion Brier score:** 0.0181 (lower is better)
+- **Champion Brier score:** 0.0148 (lower is better)
 - **Final-4 Brier score:** 0.0493
 
-Model's top title contenders vs. how they finished:
+> Title odds are rescaled to sum to 100% across the field. The model's raw `P(Champions)` column sums to 192% — its per-team distributions are not jointly normalized, so it over-allocates championship share (and deep runs generally; see calibration below).
 
-| Team | Seed | PChamp | PReach4 | Actual |
-| --- | --- | --- | --- | --- |
-| Houston | 2 | 36.900 | 46.747 | 2 |
-| Iowa St. | 2 | 32.000 | 38.300 | 2 |
-| Florida | 1 | 25.100 | 45.455 | 1 |
-| Arizona | 1 | 20.000 | 35.235 | 4 |
-| Duke | 1 | 17.900 | 42.786 | 3 |
-| Illinois | 3 | 17.200 | 31.400 | 4 |
-| Purdue | 2 | 15.200 | 30.500 | 3 |
-| Michigan | 1 | 10.500 | 33.734 | 6 |
+Model's top title contenders (normalized odds) vs. how they finished:
+
+| Team | Seed | TitleOdds | Actual |
+| --- | --- | --- | --- |
+| Houston | 2 | 19.189 | 2 |
+| Iowa St. | 2 | 16.641 | 2 |
+| Florida | 1 | 13.053 | 1 |
+| Arizona | 1 | 10.400 | 4 |
+| Duke | 1 | 9.308 | 3 |
+| Illinois | 3 | 8.944 | 4 |
+| Purdue | 2 | 7.904 | 3 |
+| Michigan | 1 | 5.460 | 6 |
 
 ## Round-Reach Calibration
 
